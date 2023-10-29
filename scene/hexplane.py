@@ -162,14 +162,13 @@ class HexPlaneField(nn.Module):
         pts = normalize_aabb(pts, self.aabb)
         pts = torch.cat((pts, timestamps), dim=-1)  # [n_rays, n_samples, 4]
 
-        pts = pts.reshape(-1, pts.shape[-1])
+        pts = pts.float()  # convert the input data to float
         features = interpolate_ms_features(
             pts, ms_grids=self.grids,  # noqa
             grid_dimensions=self.grid_config[0]["grid_dimensions"],
             concat_features=self.concat_features, num_levels=None)
         if len(features) < 1:
             features = torch.zeros((0, 1)).to(features.device)
-
 
         return features
 

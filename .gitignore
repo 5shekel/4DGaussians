@@ -10,3 +10,6 @@ data/
 data
 argument/
 scripts/
+debug.log
+nerfies_processing/content
+nerfies_processing/vocab_tree_flickr100K_words32K.bin

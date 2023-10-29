@@ -369,12 +369,26 @@ def readHyperDataInfos(datadir,use_bg_points,eval):
 
     ply_path = os.path.join(datadir, "points.npy")
 
-    xyz = np.load(ply_path,allow_pickle=True)
-    xyz -= train_cam_infos.scene_center
-    xyz *= train_cam_infos.coord_scale
-    xyz = xyz.astype(np.float32)
-    shs = np.random.random((xyz.shape[0], 3)) / 255.0
-    pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((xyz.shape[0], 3)))
+    # Since this data set has no colmap data, we start with random points
+    num_pts = 2000
+    print(f"Generating random point cloud ({num_pts})...")
+    threshold = 3
+    # xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
+    # xyz_min = np.array([-1.5*threshold, -1.5*threshold, -3*threshold])
+    xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
+    xyz_min = np.array([-1.5*threshold, -1.5*threshold, -1.5*threshold])
+    # We create random points inside the bounds of the synthetic Blender scenes
+    xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
+    print("point cloud initialization:",xyz.max(axis=0),xyz.min(axis=0))
+    shs = np.random.random((num_pts, 3)) / 255.0
+    pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+    storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    #xyz = np.load(ply_path,allow_pickle=True)
+    #xyz -= train_cam_infos.scene_center
+    #xyz *= train_cam_infos.coord_scale
+    #xyz = xyz.astype(np.float32)
+    #shs = np.random.random((xyz.shape[0], 3)) / 255.0
+    #pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((xyz.shape[0], 3)))
 
 
     nerf_normalization = getNerfppNorm(train_cam)

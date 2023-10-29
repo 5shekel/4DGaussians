@@ -23,6 +23,7 @@ from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args, ModelHiddenParams
 from gaussian_renderer import GaussianModel
 from time import time
+#import pprint
 to8b = lambda x : (255*np.clip(x.cpu().numpy(),0,1)).astype(np.uint8)
 def render_set(model_path, name, iteration, views, gaussians, pipeline, background):
     render_path = os.path.join(model_path, name, "ours_{}".format(iteration), "renders")
@@ -36,7 +37,16 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     
     for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
         if idx == 0:time1 = time()
-        rendering = render(view, gaussians, pipeline, background)["render"]
+        #view.image_width = 2000
+        #view.image_height = 1000
+        #view.camera_center = torch.tensor([0.0, 0.0, 0.0])
+        projectiontransform_mod = torch.tensor([[ 1.0, 1.0, 1.0, 1.0],
+                                                [ 1.0, 1.0, 1.0, 1.0],
+                                                [ 1.0, 1.0, 1.0, 1.0],
+                                                [ 1.0, 1.0, 1.0, 1.0]])
+        view.full_proj_transform *= projectiontransform_mod
+        #pprint.pprint(vars(view))
+        rendering = render(view, gaussians, pipeline, background)["render"]# you can change this between "depth" and "render"
         # torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
         render_images.append(to8b(rendering).transpose(1,2,0))
         # print(to8b(rendering).shape)
